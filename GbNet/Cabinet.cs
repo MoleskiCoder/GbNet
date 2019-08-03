@@ -2,9 +2,13 @@
 {
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
+    using Microsoft.Xna.Framework.Input;
+
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     using EightBit.GameBoy;
-    using System;
 
     public class Cabinet : Game
     {
@@ -15,6 +19,8 @@
         private readonly Configuration configuration;
         private readonly ColourPalette palette = new ColourPalette();
         private readonly EightBit.GameBoy.Display<Color> lcd;
+
+        private readonly List<Keys> pressed = new List<Keys>();
 
         private readonly GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
@@ -74,6 +80,7 @@
         protected override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+            this.CheckKeyboard();
             this.DrawFrame();
         }
 
@@ -102,6 +109,89 @@
                 }
 
                 this.disposed = true;
+            }
+        }
+
+        private void CheckKeyboard()
+        {
+            var state = Keyboard.GetState();
+            var current = new HashSet<Keys>(state.GetPressedKeys());
+
+            var newlyReleased = this.pressed.Except(current);
+            this.UpdateReleasedKeys(newlyReleased);
+
+            var newlyPressed = current.Except(this.pressed);
+            this.UpdatePressedKeys(newlyPressed);
+
+            this.pressed.Clear();
+            this.pressed.AddRange(current);
+        }
+
+        private void UpdatePressedKeys(IEnumerable<Keys> keys)
+        {
+            foreach (var key in keys)
+            {
+                switch (key)
+                {
+                    case Keys.Up:
+                        this.Motherboard.IO.PressUp();
+                        break;
+                    case Keys.Down:
+                        this.Motherboard.IO.PressDown();
+                        break;
+                    case Keys.Left:
+                        this.Motherboard.IO.PressLeft();
+                        break;
+                    case Keys.Right:
+                        this.Motherboard.IO.PressRight();
+                        break;
+                    case Keys.Z:
+                        this.Motherboard.IO.PressB();
+                        break;
+                    case Keys.X:
+                        this.Motherboard.IO.PressA();
+                        break;
+                    case Keys.Back:
+                        this.Motherboard.IO.PressSelect();
+                        break;
+                    case Keys.Enter:
+                        this.Motherboard.IO.PressStart();
+                        break;
+                }
+            }
+        }
+
+        private void UpdateReleasedKeys(IEnumerable<Keys> keys)
+        {
+            foreach (var key in keys)
+            {
+                switch (key)
+                {
+                    case Keys.Up:
+                        this.Motherboard.IO.ReleaseUp();
+                        break;
+                    case Keys.Down:
+                        this.Motherboard.IO.ReleaseDown();
+                        break;
+                    case Keys.Left:
+                        this.Motherboard.IO.ReleaseLeft();
+                        break;
+                    case Keys.Right:
+                        this.Motherboard.IO.ReleaseRight();
+                        break;
+                    case Keys.Z:
+                        this.Motherboard.IO.ReleaseB();
+                        break;
+                    case Keys.X:
+                        this.Motherboard.IO.ReleaseA();
+                        break;
+                    case Keys.Back:
+                        this.Motherboard.IO.ReleaseSelect();
+                        break;
+                    case Keys.Enter:
+                        this.Motherboard.IO.ReleaseStart();
+                        break;
+                }
             }
         }
 
