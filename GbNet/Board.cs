@@ -15,7 +15,6 @@
 
         public override void Initialize()
         {
-            this.WrittenByte += this.Board_WrittenByte;
             if (this.configuration.DebugMode)
             {
                 this.CPU.ExecutingInstruction += this.CPU_ExecutingInstruction_Debug;
@@ -25,16 +24,6 @@
         }
 
         public void Plug(string path) => this.LoadGameRom(this.configuration.RomDirectory + "/" + path);
-
-        private void Board_WrittenByte(object sender, System.EventArgs e)
-        {
-            switch (this.Address.Word)
-            {
-                case EightBit.GameBoy.IoRegisters.BASE + EightBit.GameBoy.IoRegisters.SB:
-                    System.Console.Out.Write(Convert.ToChar(this.Data));
-                    break;
-            }
-        }
 
         private void CPU_ExecutingInstruction_Debug(object sender, System.EventArgs e)
         {
