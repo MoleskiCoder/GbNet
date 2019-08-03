@@ -10,11 +10,16 @@
 
     using EightBit.GameBoy;
 
+    using GbSoundEmuNet;
+
     public class Cabinet : Game
     {
         private const int DisplayScale = 2;
         private const int DisplayWidth = DisplayCharacteristics.RasterWidth;
         private const int DisplayHeight = DisplayCharacteristics.RasterHeight;
+
+        private const int AudioOutputBufferSize = 4096;
+        private const int AudioSampleRate = 44100;
 
         private readonly Configuration configuration;
         private readonly ColourPalette palette = new ColourPalette();
@@ -22,11 +27,17 @@
 
         private readonly List<Keys> pressed = new List<Keys>();
 
+        private readonly GbApu apu = new GbApu();
+        private readonly SoundQueue audioQueue = new SoundQueue();
+        private readonly StereoBuffer audioMixBuffer = new StereoBuffer();
+        private readonly BlipSample[] audioOutputBuffer = new BlipSample[AudioOutputBufferSize];
+
         private readonly GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
         private Texture2D bitmapTexture;
 
         private int cycles = 0;
+        private int frameCycles = 0;
 
         private bool disposed = false;
 
@@ -56,8 +67,31 @@
             this.ChangeResolution(DisplayWidth, DisplayHeight);
             this.palette.Load();
             this.cycles = 0;
+            this.InitialiseAudio();
 
             this.Motherboard.IO.DisplayStatusModeUpdated += this.IO_DisplayStatusModeUpdated;
+
+            this.Motherboard.ReadingByte += this.Motherboard_ReadingByte;
+            this.Motherboard.WrittenByte += this.Motherboard_WrittenByte;
+        }
+
+        private void Motherboard_WrittenByte(object sender, EventArgs e)
+        {
+            var address = this.Motherboard.Address.Word;
+            if (address > GbApu.StartAddress && address <= GbApu.EndAddress)
+            {
+                this.apu.WriteRegister(this.frameCycles, address, this.Motherboard.Data);
+            }
+        }
+
+        private void Motherboard_ReadingByte(object sender, EventArgs e)
+        {
+            var address = this.Motherboard.Address.Word;
+            if (address >= GbApu.StartAddress && address <= GbApu.EndAddress)
+            {
+                var value = this.apu.ReadRegister(this.frameCycles, address);
+                this.Motherboard.Poke(address, value);
+            }
         }
 
         private void IO_DisplayStatusModeUpdated(object sender, LcdStatusModeEventArgs e)
@@ -197,9 +231,11 @@
 
         private void DrawFrame()
         {
+            this.frameCycles = 0;
             this.cycles += EightBit.GameBoy.Bus.CyclesPerFrame;
             this.cycles -= this.Motherboard.RunRasterLines();
             this.cycles -= this.Motherboard.RunVerticalBlankLines();
+            this.EndAudioframe(this.frameCycles);
         }
 
         private void DisplayTexture()
@@ -216,6 +252,28 @@
             this.graphics.PreferredBackBufferWidth = DisplayScale * width;
             this.graphics.PreferredBackBufferHeight = DisplayScale * height;
             this.graphics.ApplyChanges();
+        }
+
+        private void InitialiseAudio()
+        {
+            this.audioMixBuffer.SetSampleRate(AudioSampleRate);
+
+            this.audioMixBuffer.ClockRate = EightBit.GameBoy.Bus.CyclesPerSecond;
+            this.apu.Output(this.audioMixBuffer.Center, this.audioMixBuffer.Left, this.audioMixBuffer.Right);
+
+            this.audioQueue.Start(AudioSampleRate, 2);
+        }
+
+        private void EndAudioframe(int length)
+        {
+            var stereo = this.apu.EndFrame(length);
+            this.audioMixBuffer.EndFrame(length, stereo);
+
+            if (this.audioMixBuffer.SamplesAvailable >= AudioOutputBufferSize)
+            {
+                var count = this.audioMixBuffer.ReadSamples(this.audioOutputBuffer);
+                this.audioQueue.Write(this.audioOutputBuffer, (int)count);
+            }
         }
     }
 }

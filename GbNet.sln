@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EightBit", "libraries\Eight
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LR35902", "libraries\EightBitNet\LR35902\LR35902.csproj", "{01F61A1D-CB4A-4EA3-96EF-222F831DF483}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GbSoundEmuNet", "GbSoundEmuNet\GbSoundEmuNet.csproj", "{CC8F4E89-576B-4455-AA3F-7D9BD8A7C181}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{01F61A1D-CB4A-4EA3-96EF-222F831DF483}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{01F61A1D-CB4A-4EA3-96EF-222F831DF483}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{01F61A1D-CB4A-4EA3-96EF-222F831DF483}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC8F4E89-576B-4455-AA3F-7D9BD8A7C181}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC8F4E89-576B-4455-AA3F-7D9BD8A7C181}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC8F4E89-576B-4455-AA3F-7D9BD8A7C181}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC8F4E89-576B-4455-AA3F-7D9BD8A7C181}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
