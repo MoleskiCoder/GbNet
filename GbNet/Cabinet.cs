@@ -62,7 +62,7 @@
 
         private void IO_DisplayStatusModeUpdated(object sender, LcdStatusModeEventArgs e)
         {
-            switch (e.Mode & (LcdStatusMode)EightBit.Mask.Mask3)
+            switch (e.Mode)
             {
                 case LcdStatusMode.HBlank:
                     break;
