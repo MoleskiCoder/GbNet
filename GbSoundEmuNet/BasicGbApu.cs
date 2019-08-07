@@ -5,34 +5,34 @@
         private const int FrameLength = 70224;
 
         private readonly GbApu apu = new GbApu();
-        private readonly StereoBuffer buf = new StereoBuffer();
-        private long time = 0;
+        private readonly StereoBuffer buffer = new StereoBuffer();
+        private int time = 0;
 
         public long SampleRate
         {
             set
             {
-                this.apu.Output(this.buf.Center, this.buf.Left, this.buf.Right);
-                this.buf.ClockRate = 4194304;
-                this.buf.SetSampleRate(value);
+                this.apu.Output(this.buffer.Center, this.buffer.Left, this.buffer.Right);
+                this.buffer.ClockRate = 4194304;
+                this.buffer.SetSampleRate(value);
             }
         }
 
-        public long SamplesAvailable => this.buf.SamplesAvailable;
+        public long SamplesAvailable => this.buffer.SamplesAvailable;
 
-        private long Clock => this.time += 4;
+        private int Clock => this.time += 4;
 
-        public void WriteRegister(ushort addr, byte data) => this.apu.WriteRegister((int)this.Clock, addr, data);
+        public void WriteRegister(ushort address, byte data) => this.apu.WriteRegister(this.Clock, address, data);
 
-        public byte ReadRegister(ushort addr) => this.apu.ReadRegister((int)this.Clock, addr);
+        public byte ReadRegister(ushort address) => this.apu.ReadRegister(this.Clock, address);
 
         public void EndFrame()
         {
             this.time = 0;
             var stereo = this.apu.EndFrame(FrameLength);
-            this.buf.EndFrame(FrameLength, stereo);
+            this.buffer.EndFrame(FrameLength, stereo);
         }
 
-        public int ReadSamples(short[] destination) => this.buf.ReadSamples(destination);
+        public int ReadSamples(short[] destination) => this.buffer.ReadSamples(destination);
     }
 }
