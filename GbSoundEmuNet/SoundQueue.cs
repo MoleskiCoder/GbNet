@@ -8,7 +8,7 @@ namespace GbSoundEmuNet
 {
     public class SoundQueue
     {
-        public void Write(BlipSample[] x, int count)
+        public void Write(short[] x, int count)
         {
         }
 

@@ -28,7 +28,7 @@ namespace GbSoundEmuNet
         {
         }
 
-        public long ReadSamples(BlipSample[] x)
+        public int ReadSamples(short[] x)
         {
             return 0;
         }

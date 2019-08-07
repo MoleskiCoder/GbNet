@@ -27,17 +27,15 @@
 
         private readonly List<Keys> pressed = new List<Keys>();
 
-        private readonly GbApu apu = new GbApu();
+        private readonly BasicGbApu apu = new BasicGbApu();
         private readonly SoundQueue audioQueue = new SoundQueue();
-        private readonly StereoBuffer audioMixBuffer = new StereoBuffer();
-        private readonly BlipSample[] audioOutputBuffer = new BlipSample[AudioOutputBufferSize];
+        private readonly short[] audioOutputBuffer = new short[AudioOutputBufferSize];
 
         private readonly GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
         private Texture2D bitmapTexture;
 
         private int cycles = 0;
-        private int frameCycles = 0;
 
         private bool disposed = false;
 
@@ -80,7 +78,7 @@
             var address = this.Motherboard.Address.Word;
             if (address > GbApu.StartAddress && address <= GbApu.EndAddress)
             {
-                this.apu.WriteRegister(this.frameCycles, address, this.Motherboard.Data);
+                this.apu.WriteRegister(address, this.Motherboard.Data);
             }
         }
 
@@ -89,7 +87,7 @@
             var address = this.Motherboard.Address.Word;
             if (address >= GbApu.StartAddress && address <= GbApu.EndAddress)
             {
-                var value = this.apu.ReadRegister(this.frameCycles, address);
+                var value = this.apu.ReadRegister(address);
                 this.Motherboard.Poke(address, value);
             }
         }
@@ -116,6 +114,7 @@
             base.Update(gameTime);
             this.CheckKeyboard();
             this.DrawFrame();
+            this.EndAudioframe();
         }
 
         protected override void Draw(GameTime gameTime)
@@ -231,11 +230,9 @@
 
         private void DrawFrame()
         {
-            this.frameCycles = 0;
             this.cycles += EightBit.GameBoy.Bus.CyclesPerFrame;
             this.cycles -= this.Motherboard.RunRasterLines();
             this.cycles -= this.Motherboard.RunVerticalBlankLines();
-            this.EndAudioframe(this.frameCycles);
         }
 
         private void DisplayTexture()
@@ -256,23 +253,17 @@
 
         private void InitialiseAudio()
         {
-            this.audioMixBuffer.SetSampleRate(AudioSampleRate);
-
-            this.audioMixBuffer.ClockRate = EightBit.GameBoy.Bus.CyclesPerSecond;
-            this.apu.Output(this.audioMixBuffer.Center, this.audioMixBuffer.Left, this.audioMixBuffer.Right);
-
+            this.apu.SampleRate = AudioSampleRate;
             this.audioQueue.Start(AudioSampleRate, 2);
         }
 
-        private void EndAudioframe(int length)
+        private void EndAudioframe()
         {
-            var stereo = this.apu.EndFrame(length);
-            this.audioMixBuffer.EndFrame(length, stereo);
-
-            if (this.audioMixBuffer.SamplesAvailable >= AudioOutputBufferSize)
+            this.apu.EndFrame();
+            if (this.apu.SamplesAvailable >= AudioOutputBufferSize)
             {
-                var count = this.audioMixBuffer.ReadSamples(this.audioOutputBuffer);
-                this.audioQueue.Write(this.audioOutputBuffer, (int)count);
+                var count = this.apu.ReadSamples(this.audioOutputBuffer);
+                this.audioQueue.Write(this.audioOutputBuffer, count);
             }
         }
     }
