@@ -21,7 +21,7 @@ namespace GbSoundEmuNet
     using System;
     using System.Collections.Generic;
 
-    public class BlipBuffer
+    public class Blip_Buffer
     {
         // Make buffer as large as possible (currently about 65000 samples)
         public const int blip_default_length = 0;
@@ -29,19 +29,19 @@ namespace GbSoundEmuNet
         public const int BLIP_BUFFER_ACCURACY = 16;
 
         // Construct an empty buffer.
-        //public BlipBuffer()
-        //{
-        //    samples_per_sec = 44100;
+        public Blip_Buffer()
+        {
+            samples_per_sec = 44100;
 
-        //    // try to cause assertion failure if buffer is used before these are set
-        //    clocks_per_sec = 0;
-        //    factor_ = ~0ul;
-        //    offset_ = 0;
-        //    buffer_size_ = 0;
-        //    length_ = 0;
+            // try to cause assertion failure if buffer is used before these are set
+            clocks_per_sec = 0;
+            factor_ = ~0ul;
+            offset_ = 0;
+            buffer_size_ = 0;
+            length_ = 0;
 
-        //    bass_freq_ = 16;
-        //}
+            bass_freq_ = 16;
+        }
 
         // Set output sample rate and buffer length in milliseconds (1/1000 sec),
         // then clear buffer. If length is not specified, make as large as possible.
@@ -129,15 +129,22 @@ namespace GbSoundEmuNet
             offset_ = 0;
             reader_accum = 0;
             if (buffer_.Length != 0)
+            {
                 for (int i = 0; i < count + widest_impulse_; ++i)
                     buffer_[i] = sample_offset_;
+            }
         }
 
-        //      // End current time frame of specified duration and make its samples available
-        //      // (along with any still-unread samples) for reading with read_samples(). Begin
-        //      // a new time frame at the end of the current frame. All transitions must have
-        //      // been added before 'time'.
-        //      public void end_frame(blip_time_t time);
+        // End current time frame of specified duration and make its samples available
+        // (along with any still-unread samples) for reading with read_samples(). Begin
+        // a new time frame at the end of the current frame. All transitions must have
+        // been added before 'time'.
+        public void end_frame(long t)
+        {
+            offset_ += (ulong)t * this.factor_;
+            //assert(("Blip_Buffer::end_frame(): Frame went past end of buffer",
+            //    samples_avail() <= (long)buffer_size_));
+        }
 
         // Number of samples available for reading with read_samples()
         public long samples_avail()

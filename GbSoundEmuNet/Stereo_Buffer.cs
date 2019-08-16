@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GbSoundEmuNet
 {
-    public class StereoBuffer
+    public class Stereo_Buffer
     {
         private long samplesAvailable;
 
@@ -14,11 +14,11 @@ namespace GbSoundEmuNet
 
         public long ClockRate { get; set; }
 
-        public BlipBuffer Center { get; } = new BlipBuffer();
+        public Blip_Buffer Center { get; } = new Blip_Buffer();
 
-        public BlipBuffer Left { get; } = new BlipBuffer();
+        public Blip_Buffer Left { get; } = new Blip_Buffer();
 
-        public BlipBuffer Right { get; } = new BlipBuffer();
+        public Blip_Buffer Right { get; } = new Blip_Buffer();
 
         public void SetSampleRate(long x, int msec = 0)
         {

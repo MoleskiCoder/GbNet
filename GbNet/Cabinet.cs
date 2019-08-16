@@ -27,8 +27,8 @@
 
         private readonly List<Keys> pressed = new List<Keys>();
 
-        private readonly BasicGbApu apu = new BasicGbApu();
-        private readonly SoundQueue audioQueue = new SoundQueue();
+        private readonly Basic_Gb_Apu apu = new Basic_Gb_Apu();
+        private readonly Sound_Queue audioQueue = new Sound_Queue();
         private readonly short[] audioOutputBuffer = new short[AudioOutputBufferSize];
 
         private readonly GraphicsDeviceManager graphics;
@@ -76,18 +76,18 @@
         private void Motherboard_WrittenByte(object sender, EventArgs e)
         {
             var address = this.Motherboard.Address.Word;
-            if (address > GbApu.StartAddress && address <= GbApu.EndAddress)
+            if (address > Gb_Apu.start_addr && address <= Gb_Apu.end_addr)
             {
-                this.apu.WriteRegister(address, this.Motherboard.Data);
+                this.apu.write_register(address, this.Motherboard.Data);
             }
         }
 
         private void Motherboard_ReadingByte(object sender, EventArgs e)
         {
             var address = this.Motherboard.Address.Word;
-            if (address >= GbApu.StartAddress && address <= GbApu.EndAddress)
+            if (address >= Gb_Apu.start_addr && address <= Gb_Apu.end_addr)
             {
-                var value = this.apu.ReadRegister(address);
+                var value = this.apu.read_register(address);
                 this.Motherboard.Poke(address, value);
             }
         }
@@ -253,17 +253,17 @@
 
         private void InitialiseAudio()
         {
-            this.apu.SampleRate = AudioSampleRate;
-            this.audioQueue.Start(AudioSampleRate, 2);
+            this.apu.set_sample_rate(AudioSampleRate);
+            this.audioQueue.start(AudioSampleRate, 2);
         }
 
         private void EndAudioframe()
         {
-            this.apu.EndFrame();
-            if (this.apu.SamplesAvailable >= AudioOutputBufferSize)
+            this.apu.end_frame();
+            if (this.apu.samples_avail() >= AudioOutputBufferSize)
             {
-                var count = this.apu.ReadSamples(this.audioOutputBuffer);
-                this.audioQueue.Write(this.audioOutputBuffer, count);
+                var count = this.apu.read_samples(this.audioOutputBuffer);
+                this.audioQueue.write(this.audioOutputBuffer, count);
             }
         }
     }
