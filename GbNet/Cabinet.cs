@@ -35,8 +35,6 @@
         private SpriteBatch spriteBatch;
         private Texture2D bitmapTexture;
 
-        private int cycles = 0;
-
         private bool disposed = false;
 
         public Cabinet(Configuration configuration)
@@ -64,7 +62,6 @@
             this.bitmapTexture = new Texture2D(this.GraphicsDevice, DisplayWidth, DisplayHeight);
             this.ChangeResolution(DisplayWidth, DisplayHeight);
             this.palette.Load();
-            this.cycles = 0;
             this.InitialiseAudio();
 
             this.Motherboard.IO.DisplayStatusModeUpdated += this.IO_DisplayStatusModeUpdated;
@@ -230,15 +227,13 @@
 
         private void DrawFrame()
         {
-            this.cycles += EightBit.GameBoy.Bus.CyclesPerFrame;
-            this.cycles -= this.Motherboard.RunRasterLines();
-            this.cycles -= this.Motherboard.RunVerticalBlankLines();
+            this.Motherboard.RunVerticalBlankLines();
+            this.Motherboard.RunRasterLines();
+            this.bitmapTexture.SetData(this.lcd.Pixels);
         }
 
         private void DisplayTexture()
         {
-            this.bitmapTexture.SetData(this.lcd.Pixels);
-
             this.spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp);
             this.spriteBatch.Draw(this.bitmapTexture, Vector2.Zero, null, Color.White, 0.0F, Vector2.Zero, DisplayScale, SpriteEffects.None, 0.0F);
             this.spriteBatch.End();

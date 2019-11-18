@@ -1,7 +1,5 @@
 ﻿namespace GbNet
 {
-    using System;
-
     public class Board : EightBit.GameBoy.Bus
     {
         private readonly Configuration configuration;
