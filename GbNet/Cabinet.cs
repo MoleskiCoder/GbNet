@@ -8,22 +8,20 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    using EightBit.GameBoy;
-
     using GbSoundEmuNet;
 
     public class Cabinet : Game
     {
         private const int DisplayScale = 2;
-        private const int DisplayWidth = DisplayCharacteristics.RasterWidth;
-        private const int DisplayHeight = DisplayCharacteristics.RasterHeight;
+        private const int DisplayWidth = LR35902.DisplayCharacteristics.RasterWidth;
+        private const int DisplayHeight = LR35902.DisplayCharacteristics.RasterHeight;
 
         private const int AudioOutputBufferSize = 4096;
         private const int AudioSampleRate = 44100;
 
         private readonly Configuration configuration;
         private readonly ColourPalette palette = new ColourPalette();
-        private readonly EightBit.GameBoy.Display<Color> lcd;
+        private readonly LR35902.Display<Color> lcd;
 
         private readonly List<Keys> pressed = new List<Keys>();
 
@@ -41,7 +39,7 @@
         {
             this.configuration = configuration;
             this.Motherboard = new Board(configuration);
-            this.lcd = new Display<Color>(this.palette, this.Motherboard, this.Motherboard.OAMRAM, this.Motherboard.VRAM);
+            this.lcd = new LR35902.Display<Color>(this.palette, this.Motherboard, this.Motherboard.OAMRAM, this.Motherboard.VRAM);
 
             this.graphics = new GraphicsDeviceManager(this)
             {
@@ -89,18 +87,18 @@
             }
         }
 
-        private void IO_DisplayStatusModeUpdated(object sender, LcdStatusModeEventArgs e)
+        private void IO_DisplayStatusModeUpdated(object sender, LR35902.LcdStatusModeEventArgs e)
         {
             switch (e.Mode)
             {
-                case LcdStatusMode.HBlank:
+                case LR35902.LcdStatusMode.HBlank:
                     break;
-                case LcdStatusMode.VBlank:
+                case LR35902.LcdStatusMode.VBlank:
                     break;
-                case LcdStatusMode.SearchingOamRam:
+                case LR35902.LcdStatusMode.SearchingOamRam:
                     this.lcd.LoadObjectAttributes();
                     break;
-                case LcdStatusMode.TransferringDataToLcd:
+                case LR35902.LcdStatusMode.TransferringDataToLcd:
                     this.lcd.Render();
                     break;
             }
@@ -120,11 +118,11 @@
             this.DisplayTexture();
         }
 
-        protected override void OnExiting(object sender, EventArgs args)
-        {
-            base.OnExiting(sender, args);
-            this.Motherboard.LowerPOWER();
-        }
+        //protected override void OnExiting(object sender, EventArgs args)
+        //{
+        //    base.OnExiting(sender, args);
+        //    this.Motherboard.LowerPOWER();
+        //}
 
         protected override void Dispose(bool disposing)
         {

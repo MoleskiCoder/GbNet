@@ -1,14 +1,14 @@
 ﻿namespace GbNet
 {
-    public class Board : EightBit.GameBoy.Bus
+    public class Board : LR35902.Bus
     {
         private readonly Configuration configuration;
-        private readonly EightBit.GameBoy.Disassembler disassembler;
+        private readonly LR35902.Disassembler disassembler;
 
         public Board(Configuration configuration)
         {
             this.configuration = configuration;
-            this.disassembler = new EightBit.GameBoy.Disassembler(this);
+            this.disassembler = new LR35902.Disassembler(this);
         }
 
         public override void Initialize()
@@ -27,7 +27,7 @@
         {
             if (this.IO.BootRomDisabled)
             {
-                System.Console.Error.WriteLine($"{EightBit.GameBoy.Disassembler.State(this.CPU)} {this.disassembler.Disassemble(this.CPU)}");
+                System.Console.Error.WriteLine($"{LR35902.Disassembler.State(this.CPU)} {this.disassembler.Disassemble(this.CPU)}");
             }
         }
     }
