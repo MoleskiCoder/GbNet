@@ -20,20 +20,20 @@
         private const int AudioSampleRate = 44100;
 
         private readonly Configuration configuration;
-        private readonly ColourPalette palette = new ColourPalette();
+        private readonly ColourPalette palette = new();
         private readonly LR35902.Display<Color> lcd;
 
-        private readonly List<Keys> pressed = new List<Keys>();
+        private readonly List<Keys> pressed = [];
 
-        private readonly Basic_Gb_Apu apu = new Basic_Gb_Apu();
-        private readonly Sound_Queue audioQueue = new Sound_Queue();
+        private readonly Basic_Gb_Apu apu = new();
+        private readonly Sound_Queue audioQueue = new();
         private readonly short[] audioOutputBuffer = new short[AudioOutputBufferSize];
 
         private readonly GraphicsDeviceManager graphics;
-        private SpriteBatch spriteBatch;
-        private Texture2D bitmapTexture;
+        private SpriteBatch? spriteBatch;
+        private Texture2D? bitmapTexture;
 
-        private bool disposed = false;
+        private bool disposed;
 
         public Cabinet(Configuration configuration)
         {
@@ -68,26 +68,26 @@
             this.Motherboard.WrittenByte += this.Motherboard_WrittenByte;
         }
 
-        private void Motherboard_WrittenByte(object sender, EventArgs e)
+        private void Motherboard_WrittenByte(object? sender, EventArgs e)
         {
             var address = this.Motherboard.Address.Word;
-            if (address > Gb_Apu.start_addr && address <= Gb_Apu.end_addr)
+            if (address is > Gb_Apu.start_addr and <= Gb_Apu.end_addr)
             {
                 this.apu.write_register(address, this.Motherboard.Data);
             }
         }
 
-        private void Motherboard_ReadingByte(object sender, EventArgs e)
+        private void Motherboard_ReadingByte(object? sender, EventArgs e)
         {
             var address = this.Motherboard.Address.Word;
-            if (address >= Gb_Apu.start_addr && address <= Gb_Apu.end_addr)
+            if (address is >= Gb_Apu.start_addr and <= Gb_Apu.end_addr)
             {
                 var value = this.apu.read_register(address);
                 this.Motherboard.Poke(address, value);
             }
         }
 
-        private void IO_DisplayStatusModeUpdated(object sender, LR35902.LcdStatusModeEventArgs e)
+        private void IO_DisplayStatusModeUpdated(object? sender, LR35902.LcdStatusModeEventArgs e)
         {
             switch (e.Mode)
             {
@@ -109,7 +109,7 @@
             base.Update(gameTime);
             this.CheckKeyboard();
             this.DrawFrame();
-            this.EndAudioframe();
+            this.EndAudioFrame();
         }
 
         protected override void Draw(GameTime gameTime)
@@ -227,14 +227,14 @@
         {
             this.Motherboard.RunVerticalBlankLines();
             this.Motherboard.RunRasterLines();
-            this.bitmapTexture.SetData(this.lcd.Pixels);
+            this.bitmapTexture?.SetData(this.lcd.Pixels);
         }
 
         private void DisplayTexture()
         {
-            this.spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp);
-            this.spriteBatch.Draw(this.bitmapTexture, Vector2.Zero, null, Color.White, 0.0F, Vector2.Zero, DisplayScale, SpriteEffects.None, 0.0F);
-            this.spriteBatch.End();
+            this.spriteBatch?.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp);
+            this.spriteBatch?.Draw(this.bitmapTexture, Vector2.Zero, null, Color.White, 0.0F, Vector2.Zero, DisplayScale, SpriteEffects.None, 0.0F);
+            this.spriteBatch?.End();
         }
 
         private void ChangeResolution(int width, int height)
@@ -250,7 +250,7 @@
             this.audioQueue.start(AudioSampleRate, 2);
         }
 
-        private void EndAudioframe()
+        private void EndAudioFrame()
         {
             this.apu.end_frame();
             if (this.apu.samples_avail() >= AudioOutputBufferSize)

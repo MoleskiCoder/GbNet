@@ -23,7 +23,7 @@
 
         public void Plug(string path) => this.LoadGameRom(this.configuration.RomDirectory + "/" + path);
 
-        private void CPU_ExecutingInstruction_Debug(object sender, System.EventArgs e)
+        private void CPU_ExecutingInstruction_Debug(object? sender, System.EventArgs e)
         {
             if (this.IO.BootRomDisabled)
             {
